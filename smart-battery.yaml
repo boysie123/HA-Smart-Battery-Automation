@@ -1,0 +1,109 @@
+alias: House - Battery Smart Charging
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.octopus_energy_a_77266c4c_intelligent_dispatching
+    from: "off"
+    to: "on"
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    id: " When Octopus Energy Intelligent Dispatching changes from Off to On for 1:00"
+  - platform: state
+    entity_id:
+      - binary_sensor.octopus_energy_a_77266c4c_intelligent_dispatching
+    to: "off"
+    id: " When Octopus Energy Intelligent Dispatching changes to Off"
+    from: "on"
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - " When Octopus Energy Intelligent Dispatching changes from Off to On for 1:00"
+        sequence:
+          - service: notify.notify
+            metadata: {}
+            data:
+              message: Just changed to a cheap 7.5p per kwh
+          - service: myenergi.myenergi_eddi_boost
+            data:
+              target: Heater 1
+              time: 180
+            target:
+              device_id: 3c50043fcc36272e2dfa09be8caebc13
+          - if:
+              - condition: time
+                weekday:
+                  - sat
+                  - fri
+                  - thu
+                  - wed
+                  - tue
+                  - mon
+                  - sun
+                after: "18:00:00"
+              - type: is_energy
+                condition: device
+                device_id: 782cc2d5f2f3052a3245e4b4c5a11533
+                entity_id: 56295d358278859105f88812adbe907e
+                domain: sensor
+                below: 12
+            then:
+              - device_id: 32f302ce620ed71b0d18aee4ef20da29
+                domain: number
+                entity_id: abe401fa035ff5eddca8a42bbfe30caf
+                type: set_value
+                value: 100
+            else:
+              - if:
+                  - condition: time
+                    before: "18:00:00"
+                    weekday:
+                      - sat
+                      - fri
+                      - thu
+                      - wed
+                      - tue
+                      - mon
+                      - sun
+                  - type: is_energy
+                    condition: device
+                    device_id: 782cc2d5f2f3052a3245e4b4c5a11533
+                    entity_id: 4788bb0d94673536c53082b75576bde7
+                    domain: sensor
+                    below: 12
+                then:
+                  - device_id: 32f302ce620ed71b0d18aee4ef20da29
+                    domain: number
+                    entity_id: abe401fa035ff5eddca8a42bbfe30caf
+                    type: set_value
+                    value: 100
+                else:
+                  - device_id: 32f302ce620ed71b0d18aee4ef20da29
+                    domain: number
+                    entity_id: abe401fa035ff5eddca8a42bbfe30caf
+                    type: set_value
+                    value: 50
+      - conditions:
+          - condition: trigger
+            id:
+              - " When Octopus Energy Intelligent Dispatching changes to Off"
+        sequence:
+          - device_id: 32f302ce620ed71b0d18aee4ef20da29
+            domain: number
+            entity_id: abe401fa035ff5eddca8a42bbfe30caf
+            type: set_value
+            value: 20
+          - service: notify.notify
+            metadata: {}
+            data:
+              message: "Cheap electric finished "
+mode: single
