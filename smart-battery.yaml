@@ -3,19 +3,19 @@ description: ""
 trigger:
   - platform: state
     entity_id:
-      - binary_sensor.octopus_energy_a_77266c4c_intelligent_dispatching
+      - binary_sensor.octopus_energy_intelligent_dispatching
     from: "off"
     to: "on"
     for:
       hours: 0
       minutes: 0
       seconds: 10
-    id: " When Octopus Energy Intelligent Dispatching changes from Off to On for 1:00"
+    id: " When Octopus Energy Intelligent Dispatching changes from Off to On for 10sec"
   - platform: state
     entity_id:
-      - binary_sensor.octopus_energy_a_77266c4c_intelligent_dispatching
+      - binary_sensor.octopus_energy_intelligent_dispatching
     to: "off"
-    id: " When Octopus Energy Intelligent Dispatching changes to Off"
+    id: " When Octopus Energy Intelligent Dispatching changes from On to Off for 10 seconds"
     from: "on"
     for:
       hours: 0
@@ -27,8 +27,13 @@ action:
       - conditions:
           - condition: trigger
             id:
-              - " When Octopus Energy Intelligent Dispatching changes from Off to On for 1:00"
+              - " When Octopus Energy Intelligent Dispatching changes from Off to On for 10sec"
         sequence:
+          - device_id: 3c50043fcc36272e2dfa09be8caebc13
+            domain: select
+            entity_id: 485bcbccff6b744c1efb0ea7686e340e
+            type: select_option
+            option: Normal
           - service: notify.notify
             metadata: {}
             data:
@@ -36,7 +41,7 @@ action:
           - service: myenergi.myenergi_eddi_boost
             data:
               target: Heater 1
-              time: 180
+              time: 600
             target:
               device_id: 3c50043fcc36272e2dfa09be8caebc13
           - if:
@@ -95,7 +100,7 @@ action:
       - conditions:
           - condition: trigger
             id:
-              - " When Octopus Energy Intelligent Dispatching changes to Off"
+              - " When Octopus Energy Intelligent Dispatching changes from On to Off for 10 seconds"
         sequence:
           - device_id: 32f302ce620ed71b0d18aee4ef20da29
             domain: number
@@ -106,4 +111,14 @@ action:
             metadata: {}
             data:
               message: "Cheap electric finished "
+          - device_id: 3c50043fcc36272e2dfa09be8caebc13
+            domain: select
+            entity_id: 485bcbccff6b744c1efb0ea7686e340e
+            type: select_option
+            option: Stopped
+          - device_id: 3c50043fcc36272e2dfa09be8caebc13
+            domain: select
+            entity_id: 485bcbccff6b744c1efb0ea7686e340e
+            type: select_option
+            option: Normal
 mode: single
